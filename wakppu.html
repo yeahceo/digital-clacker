@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>왁뿌볼 · 눌러서 빠작</title>
+<link rel="stylesheet" href="tokens.css" />
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; margin: 0; overscroll-behavior: none; }
@@ -11,43 +12,55 @@
     position: fixed; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 22px;
-    background: radial-gradient(120% 120% at 50% 0%, #2a2230 0%, #1a1620 60%, #110e16 100%);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
-      "Malgun Gothic", sans-serif;
-    color: #cabfd4; user-select: none; overflow: hidden;
+    gap: var(--space-5);
+    background: var(--bg-grad);
+    font-family: var(--font-sans);
+    color: var(--text); user-select: none; overflow: hidden;
   }
-  .title { font-size: 13px; letter-spacing: 3px; font-weight: 700; color: #b79fd0; }
+  .title {
+    font-size: var(--font-size-sm); letter-spacing: var(--tracking-title);
+    font-weight: var(--font-weight-bold); color: var(--title);
+  }
   .stage {
     position: relative;
-    width: min(82vw, 360px);
-    aspect-ratio: 1 / 1;
+    width: min(82vw, 360px); aspect-ratio: 1 / 1;
     touch-action: none;
-    filter: drop-shadow(0 24px 36px rgba(0,0,0,0.55));
-    transition: transform .07s ease;
+    filter: drop-shadow(var(--shadow-elevated));
+    transition: transform var(--dur-fast) var(--ease-out);
   }
   .stage.squish { transform: scale(0.95); }
-  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; }
-  .hint { font-size: 12px; opacity: .65; height: 16px; transition: opacity .3s; }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: var(--radius-round); }
+  .hint { font-size: var(--font-size-xs); color: var(--text-muted); height: 16px; transition: opacity var(--dur-slow); }
   .done .hint { opacity: 0; }
   .toast {
     position: absolute; left: 50%; top: 50%;
     transform: translate(-50%,-50%) scale(.8);
-    padding: 10px 18px; border-radius: 999px;
-    background: rgba(255,255,255,.92); color: #5b3b6e; font-weight: 800;
-    font-size: 16px; opacity: 0; pointer-events: none;
-    transition: opacity .25s, transform .25s;
+    padding: 10px 18px; border-radius: var(--radius-pill);
+    background: var(--surface); color: var(--toast-text);
+    font-weight: var(--font-weight-black); font-size: var(--font-size-lg);
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--dur-slow), transform var(--dur-slow);
   }
   .toast.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
-  .reset {
+  .controls { display: flex; gap: var(--space-3); align-items: center; }
+  .btn {
     appearance: none; border: 0; cursor: pointer;
-    padding: 11px 22px; border-radius: 999px;
-    background: linear-gradient(160deg, #c9a7e6, #a981d6);
-    color: #fff; font-weight: 800; font-size: 14px; letter-spacing: .5px;
-    box-shadow: 0 8px 18px -6px rgba(160,120,210,.7);
-    transition: transform .06s ease, filter .15s;
+    padding: 11px 22px; border-radius: var(--radius-pill);
+    background: linear-gradient(160deg, var(--accent), var(--accent-2));
+    color: var(--on-accent); font-weight: var(--font-weight-black);
+    font-size: var(--font-size-md); letter-spacing: var(--tracking-wide);
+    box-shadow: var(--shadow-btn);
+    transition: transform var(--dur-fast) var(--ease-out), filter var(--dur-base);
   }
-  .reset:active { transform: translateY(2px); filter: brightness(.95); }
+  .btn:active { transform: translateY(2px); filter: brightness(.95); }
+  .toggle {
+    appearance: none; border: 1.5px solid var(--accent);
+    background: transparent; color: var(--text); cursor: pointer;
+    padding: 9px 16px; border-radius: var(--radius-pill);
+    font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);
+    transition: background var(--dur-base), color var(--dur-base);
+  }
+  .toggle[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
 </style>
 </head>
 <body>
@@ -55,26 +68,52 @@
 
   <div class="stage" id="stage">
     <canvas id="slime"></canvas>
-    <canvas id="wax"></canvas>
+    <canvas id="wax0"></canvas>
+    <canvas id="wax1"></canvas>
+    <canvas id="wax2"></canvas>
     <canvas id="fx"></canvas>
     <div class="toast" id="toast">다 부쉈다! 🎉</div>
   </div>
 
-  <div class="hint" id="hint">콕콕 눌러서 왁스를 깨보세요 (문지르면 이어서 깨짐)</div>
-  <button class="reset" id="reset">다시 코팅하기</button>
+  <div class="hint" id="hint">콕콕 눌러서 왁스를 깨보세요 · 왁스는 3겹이에요</div>
+  <div class="controls">
+    <button class="toggle" id="freeze" aria-pressed="false">❄️ 얼리기</button>
+    <button class="btn" id="reset">다시 코팅하기</button>
+  </div>
 
 <script>
 (function () {
   const stage = document.getElementById("stage");
   const slimeC = document.getElementById("slime");
-  const waxC = document.getElementById("wax");
   const fxC = document.getElementById("fx");
   const toast = document.getElementById("toast");
   const sc = slimeC.getContext("2d");
-  const wc = waxC.getContext("2d");
   const fc = fxC.getContext("2d");
 
+  // 왁스 3겹 (index 0=바닥, 2=표면)
+  const LAYERS = 3;
+  const waxC = [0,1,2].map((i) => document.getElementById("wax"+i));
+  const wx = waxC.map((c) => c.getContext("2d", { willReadFrequently: true }));
+
   let W=0,H=0,R=0,CX=0,CY=0,DPR=1;
+  let frozen = false;
+
+  // ── 디자인 토큰 읽기 ──
+  const css = (n, fb) => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    return v || fb;
+  };
+  const T = {};
+  function loadTokens() {
+    T.waxTop    = css("--wax-top","#fbfbf7");
+    T.waxMid    = css("--wax-mid","#eceae4");
+    T.waxBottom = css("--wax-bottom","#e6e3da");
+    T.waxEdge   = css("--wax-edge","#d7d4cd");
+    T.waxRim    = css("--wax-rim","#f3efe6");
+    T.waxRimSh  = css("--wax-rim-shadow","#b4afa4");
+    T.waxChip   = css("--wax-chip","#f3efe6");
+    T.waxCrack  = css("--wax-crack","#6e6a62");
+  }
 
   // ── 속 색 테마(랜덤) ──
   const THEMES = [
@@ -90,9 +129,10 @@
     DPR = Math.min(window.devicePixelRatio || 1, 2.5);
     const rect = stage.getBoundingClientRect();
     W = Math.round(rect.width*DPR); H = Math.round(rect.height*DPR);
-    [slimeC,waxC,fxC].forEach(c => { c.width=W; c.height=H; });
+    [slimeC, fxC, ...waxC].forEach(c => { c.width=W; c.height=H; });
     CX=W/2; CY=H/2; R=W*0.46;
-    drawSlime(); coatWax();
+    loadTokens();
+    coatWax();
   }
 
   // ── 슬라임 본체 + 비즈 ──
@@ -107,205 +147,257 @@
     g.addColorStop(1, theme.stops[2]);
     sc.fillStyle = g; sc.fillRect(0,0,W,H);
 
-    // 속 비치는 반투명 블롭
     for (let i=0;i<10;i++){
       const a=Math.random()*Math.PI*2, rr=Math.random()*R*0.72;
       const bx=CX+Math.cos(a)*rr, by=CY+Math.sin(a)*rr, br=R*(0.1+Math.random()*0.22);
       const bg=sc.createRadialGradient(bx,by,0,bx,by,br);
-      bg.addColorStop(0,"rgba(255,255,255,0.35)");
-      bg.addColorStop(1,"rgba(255,255,255,0)");
+      bg.addColorStop(0,"rgba(255,255,255,0.35)"); bg.addColorStop(1,"rgba(255,255,255,0)");
       sc.fillStyle=bg; sc.beginPath(); sc.arc(bx,by,br,0,Math.PI*2); sc.fill();
     }
 
-    // 비즈(작은 알갱이)
+    // 비즈(박힌 알갱이)
     const beads = Math.floor((R*R)/650);
     for (let i=0;i<beads;i++){
       const a=Math.random()*Math.PI*2, rr=Math.sqrt(Math.random())*R*0.92;
-      const x=CX+Math.cos(a)*rr, y=CY+Math.sin(a)*rr;
-      const s=(2.5+Math.random()*3.5)*DPR;
-      const col=theme.beads[(Math.random()*theme.beads.length)|0];
-      sc.fillStyle=col; sc.beginPath(); sc.arc(x,y,s,0,Math.PI*2); sc.fill();
+      const x=CX+Math.cos(a)*rr, y=CY+Math.sin(a)*rr, s=(2.5+Math.random()*3.5)*DPR;
+      sc.fillStyle=theme.beads[(Math.random()*theme.beads.length)|0];
+      sc.beginPath(); sc.arc(x,y,s,0,Math.PI*2); sc.fill();
       sc.fillStyle="rgba(255,255,255,0.8)";
       sc.beginPath(); sc.arc(x-s*0.3,y-s*0.3,s*0.32,0,Math.PI*2); sc.fill();
     }
 
-    // 윤기 + 림
     const hg=sc.createRadialGradient(CX-R*0.38,CY-R*0.42,0,CX-R*0.38,CY-R*0.42,R*0.6);
-    hg.addColorStop(0,"rgba(255,255,255,0.7)");
-    hg.addColorStop(0.5,"rgba(255,255,255,0.1)");
-    hg.addColorStop(1,"rgba(255,255,255,0)");
-    sc.fillStyle=hg; sc.beginPath();
-    sc.ellipse(CX-R*0.32,CY-R*0.36,R*0.42,R*0.3,-0.5,0,Math.PI*2); sc.fill();
+    hg.addColorStop(0,"rgba(255,255,255,0.7)"); hg.addColorStop(0.5,"rgba(255,255,255,0.1)"); hg.addColorStop(1,"rgba(255,255,255,0)");
+    sc.fillStyle=hg; sc.beginPath(); sc.ellipse(CX-R*0.32,CY-R*0.36,R*0.42,R*0.3,-0.5,0,Math.PI*2); sc.fill();
     const rim=sc.createRadialGradient(CX,CY,R*0.7,CX,CY,R);
     rim.addColorStop(0,"rgba(40,10,40,0)"); rim.addColorStop(1,"rgba(30,5,30,0.5)");
     sc.fillStyle=rim; sc.fillRect(0,0,W,H);
     sc.restore();
   }
 
-  // ── 왁스 코팅 ──
+  // ── 왁스 3겹 코팅 ──
+  function coatLayer(ctx, base, gloss) {
+    ctx.globalCompositeOperation="source-over";
+    ctx.clearRect(0,0,W,H);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2); ctx.clip();
+
+    const g=ctx.createRadialGradient(CX-R*0.3,CY-R*0.35,R*0.1,CX,CY,R);
+    g.addColorStop(0, base); g.addColorStop(0.65, base); g.addColorStop(1, T.waxEdge);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    const dots=Math.floor((R*R)/120);
+    for (let i=0;i<dots;i++){
+      const a=Math.random()*Math.PI*2, rr=Math.sqrt(Math.random())*R;
+      const x=CX+Math.cos(a)*rr, y=CY+Math.sin(a)*rr, s=Math.random()*1.5*DPR+0.3*DPR;
+      ctx.fillStyle=Math.random()>0.5?"rgba(255,255,255,0.5)":"rgba(150,148,140,0.3)";
+      ctx.beginPath(); ctx.arc(x,y,s,0,Math.PI*2); ctx.fill();
+    }
+    if (gloss){
+      const hg=ctx.createRadialGradient(CX-R*0.4,CY-R*0.44,0,CX-R*0.4,CY-R*0.44,R*0.55);
+      hg.addColorStop(0,"rgba(255,255,255,0.85)"); hg.addColorStop(1,"rgba(255,255,255,0)");
+      ctx.fillStyle=hg; ctx.beginPath();
+      ctx.ellipse(CX-R*0.34,CY-R*0.38,R*0.36,R*0.26,-0.5,0,Math.PI*2); ctx.fill();
+    }
+    const rim=ctx.createRadialGradient(CX,CY,R*0.72,CX,CY,R);
+    rim.addColorStop(0,"rgba(120,116,108,0)"); rim.addColorStop(1,"rgba(90,86,80,0.5)");
+    ctx.fillStyle=rim; ctx.fillRect(0,0,W,H);
+    ctx.restore();
+  }
   function coatWax() {
     theme = THEMES[(Math.random()*THEMES.length)|0];
     drawSlime();
-    wc.globalCompositeOperation="source-over";
-    wc.clearRect(0,0,W,H);
-    wc.save();
-    wc.beginPath(); wc.arc(CX,CY,R,0,Math.PI*2); wc.clip();
-
-    const g=wc.createRadialGradient(CX-R*0.3,CY-R*0.35,R*0.1,CX,CY,R);
-    g.addColorStop(0,"#fbfbf7"); g.addColorStop(0.6,"#eceae4"); g.addColorStop(1,"#d7d4cd");
-    wc.fillStyle=g; wc.fillRect(0,0,W,H);
-
-    const dots=Math.floor((R*R)/90);
-    for (let i=0;i<dots;i++){
-      const a=Math.random()*Math.PI*2, rr=Math.sqrt(Math.random())*R;
-      const x=CX+Math.cos(a)*rr, y=CY+Math.sin(a)*rr, s=Math.random()*1.6*DPR+0.3*DPR;
-      wc.fillStyle=Math.random()>0.5?"rgba(255,255,255,0.6)":"rgba(150,148,140,0.35)";
-      wc.beginPath(); wc.arc(x,y,s,0,Math.PI*2); wc.fill();
-    }
-    const hg=wc.createRadialGradient(CX-R*0.4,CY-R*0.44,0,CX-R*0.4,CY-R*0.44,R*0.55);
-    hg.addColorStop(0,"rgba(255,255,255,0.85)"); hg.addColorStop(1,"rgba(255,255,255,0)");
-    wc.fillStyle=hg; wc.beginPath();
-    wc.ellipse(CX-R*0.34,CY-R*0.38,R*0.36,R*0.26,-0.5,0,Math.PI*2); wc.fill();
-    const rim=wc.createRadialGradient(CX,CY,R*0.72,CX,CY,R);
-    rim.addColorStop(0,"rgba(120,116,108,0)"); rim.addColorStop(1,"rgba(90,86,80,0.5)");
-    wc.fillStyle=rim; wc.fillRect(0,0,W,H);
-    wc.restore();
-
+    const bases=[T.waxBottom, T.waxMid, T.waxTop];
+    for (let i=0;i<LAYERS;i++) coatLayer(wx[i], bases[i], i===LAYERS-1);
     done=false; firstCrack=true;
     stage.classList.remove("done"); toast.classList.remove("show");
   }
 
-  // ── 깨기(누르기) ──
+  // ── 깨기 ──
   function inBall(x,y){ const dx=x-CX,dy=y-CY; return dx*dx+dy*dy<=R*R; }
+
+  function topLayerAt(x,y){
+    const ix=Math.max(0,Math.min(W-1,x|0)), iy=Math.max(0,Math.min(H-1,y|0));
+    for (let i=LAYERS-1;i>=0;i--){
+      if (wx[i].getImageData(ix,iy,1,1).data[3] > 40) return i;
+    }
+    return -1;
+  }
 
   function jaggedPoly(x,y,rad){
     const n=8+(Math.random()*5|0), pts=[];
     for (let i=0;i<n;i++){
-      const a=(i/n)*Math.PI*2;
-      const r=rad*(0.6+Math.random()*0.7);
+      const a=(i/n)*Math.PI*2, r=rad*(0.6+Math.random()*0.7);
       pts.push([x+Math.cos(a)*r, y+Math.sin(a)*r]);
     }
     return pts;
   }
 
-  function crackAt(x,y,big){
-    const rad = R * (big ? 0.24 : 0.15);
-    const poly = jaggedPoly(x,y,rad);
+  function crackLayer(ctx, x, y, rad, big){
+    const poly=jaggedPoly(x,y,rad);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2); ctx.clip();
 
-    wc.save();
-    wc.beginPath(); wc.arc(CX,CY,R,0,Math.PI*2); wc.clip();
-
-    // 1) 퍼지는 금(빠작) — 남는 왁스에 그려짐
-    wc.strokeStyle="rgba(110,106,98,0.55)";
-    wc.lineWidth=1.4*DPR; wc.lineCap="round";
+    // 퍼지는 금
+    ctx.strokeStyle="rgba(110,106,98,0.55)"; ctx.lineWidth=1.4*DPR; ctx.lineCap="round";
     const spokes=4+(Math.random()*3|0);
     for (let s=0;s<spokes;s++){
-      const a=Math.random()*Math.PI*2;
-      let px=x, py=y; wc.beginPath(); wc.moveTo(px,py);
-      const segs=3+(Math.random()*3|0), len=rad*(1.4+Math.random());
+      const a=Math.random()*Math.PI*2; let px=x,py=y;
+      ctx.beginPath(); ctx.moveTo(px,py);
+      const segs=3+(Math.random()*3|0), len=rad*(1.3+Math.random());
       for (let k=1;k<=segs;k++){
-        const t=(k/segs);
-        px=x+Math.cos(a)*len*t + (Math.random()-0.5)*rad*0.4;
-        py=y+Math.sin(a)*len*t + (Math.random()-0.5)*rad*0.4;
-        wc.lineTo(px,py);
+        const t=k/segs;
+        px=x+Math.cos(a)*len*t+(Math.random()-0.5)*rad*0.4;
+        py=y+Math.sin(a)*len*t+(Math.random()-0.5)*rad*0.4;
+        ctx.lineTo(px,py);
       }
-      wc.stroke();
+      ctx.stroke();
     }
-
-    // 2) 조각 제거(cave-in)
-    wc.globalCompositeOperation="destination-out";
-    wc.beginPath(); wc.moveTo(poly[0][0],poly[0][1]);
-    for (let i=1;i<poly.length;i++) wc.lineTo(poly[i][0],poly[i][1]);
-    wc.closePath(); wc.fill();
-    wc.globalCompositeOperation="source-over";
-
-    // 3) 깨진 단면 두께(크림색 림) — 입체감
-    wc.beginPath(); wc.moveTo(poly[0][0],poly[0][1]);
-    for (let i=1;i<poly.length;i++) wc.lineTo(poly[i][0],poly[i][1]);
-    wc.closePath();
-    wc.lineJoin="round";
-    wc.strokeStyle="rgba(243,239,230,0.95)"; wc.lineWidth=5*DPR; wc.stroke();
-    wc.strokeStyle="rgba(180,175,164,0.6)"; wc.lineWidth=2*DPR; wc.stroke();
-    wc.restore();
-
-    spawnChips(x,y, big?9:5);
-    crunch(big);
-    maybeCheckDone();
+    // 조각 제거
+    ctx.globalCompositeOperation="destination-out";
+    ctx.beginPath(); ctx.moveTo(poly[0][0],poly[0][1]);
+    for (let i=1;i<poly.length;i++) ctx.lineTo(poly[i][0],poly[i][1]);
+    ctx.closePath(); ctx.fill();
+    ctx.globalCompositeOperation="source-over";
+    // 단면 두께(림)
+    ctx.beginPath(); ctx.moveTo(poly[0][0],poly[0][1]);
+    for (let i=1;i<poly.length;i++) ctx.lineTo(poly[i][0],poly[i][1]);
+    ctx.closePath(); ctx.lineJoin="round";
+    ctx.strokeStyle=T.waxRim; ctx.lineWidth=5*DPR; ctx.stroke();
+    ctx.strokeStyle=T.waxRimSh; ctx.lineWidth=2*DPR; ctx.stroke();
+    ctx.restore();
   }
 
-  // ── 튀는 왁스 조각 ──
-  const chips=[]; let fxRunning=false;
+  function crackAt(x,y,big){
+    const layer = topLayerAt(x,y);
+    if (layer < 0) { squishTap(); return false; }   // 이미 다 깬 곳 → 말랑 탭
+    const rad = R * (big ? 0.22 : 0.14);
+    crackLayer(wx[layer], x, y, rad, big);
+    spawnChips(x,y, big?9:5);
+    crunch(big, layer);
+    if (layer === 0) beadBurst(x,y);                 // 바닥층 뚫림 → 비즈 쏟아짐
+    maybeCheckDone();
+    return true;
+  }
+
+  // ── 파티클: 왁스 조각 + 비즈 ──
+  const parts=[]; let fxRunning=false;
   function spawnChips(x,y,n){
     for (let i=0;i<n;i++){
       const a=Math.random()*Math.PI*2, sp=(1+Math.random()*3.5)*DPR;
-      chips.push({ x,y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-1.8*DPR,
+      parts.push({ type:"chip", x,y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-1.8*DPR,
         s:(1.6+Math.random()*3.4)*DPR, life:1, rot:Math.random()*Math.PI, vr:(Math.random()-0.5)*0.4 });
     }
-    if (!fxRunning){ fxRunning=true; requestAnimationFrame(fxLoop); }
+    runFx();
   }
+  function beadBurst(x,y){
+    const n=8+(Math.random()*7|0);
+    for (let i=0;i<n;i++){
+      const a=Math.random()*Math.PI*2, sp=(1.5+Math.random()*4)*DPR;
+      parts.push({ type:"bead", x,y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-2.2*DPR,
+        s:(2.5+Math.random()*3)*DPR, life:1,
+        col: theme.beads[(Math.random()*theme.beads.length)|0] });
+    }
+    runFx();
+  }
+  function runFx(){ if (!fxRunning){ fxRunning=true; requestAnimationFrame(fxLoop); } }
   function fxLoop(){
     fc.clearRect(0,0,W,H);
-    for (let i=chips.length-1;i>=0;i--){
-      const p=chips[i];
-      p.vy+=0.35*DPR; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life-=0.024;
-      if (p.life<=0){ chips.splice(i,1); continue; }
-      fc.save(); fc.translate(p.x,p.y); fc.rotate(p.rot);
-      fc.globalAlpha=Math.max(0,p.life); fc.fillStyle="#f3f1ea";
-      fc.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.8); fc.restore();
+    for (let i=parts.length-1;i>=0;i--){
+      const p=parts[i];
+      p.vy+=0.35*DPR; p.x+=p.vx; p.y+=p.vy; p.life-=0.022;
+      if (p.life<=0){ parts.splice(i,1); continue; }
+      fc.globalAlpha=Math.max(0,p.life);
+      if (p.type==="bead"){
+        fc.fillStyle=p.col;
+        fc.beginPath(); fc.arc(p.x,p.y,p.s,0,Math.PI*2); fc.fill();
+        fc.globalAlpha=Math.max(0,p.life)*0.8; fc.fillStyle="rgba(255,255,255,0.85)";
+        fc.beginPath(); fc.arc(p.x-p.s*0.3,p.y-p.s*0.3,p.s*0.32,0,Math.PI*2); fc.fill();
+      } else {
+        p.rot+=p.vr;
+        fc.save(); fc.translate(p.x,p.y); fc.rotate(p.rot);
+        fc.fillStyle=T.waxChip; fc.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.8); fc.restore();
+      }
     }
-    if (chips.length) requestAnimationFrame(fxLoop);
+    fc.globalAlpha=1;
+    if (parts.length) requestAnimationFrame(fxLoop);
     else { fc.clearRect(0,0,W,H); fxRunning=false; }
   }
 
-  // ── 소리(Web Audio 합성) ──
+  // ── 소리 ──
   let ctx, unlocked=false, silentEl, lastSound=0;
   function audio(){ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); return ctx; }
   function unlockAudio(){
     if (unlocked) return;
     const ac=audio(); if (ac.state==="suspended") ac.resume();
-    const b=ac.createBuffer(1,1,22050); const s=ac.createBufferSource();
-    s.buffer=b; s.connect(ac.destination); s.start(0);
+    const b=ac.createBuffer(1,1,22050); const s=ac.createBufferSource(); s.buffer=b; s.connect(ac.destination); s.start(0);
     if (!silentEl){ silentEl=new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="); silentEl.loop=true; silentEl.volume=0.001; }
     silentEl.play().catch(function(){}); unlocked=true;
   }
   ["pointerdown","touchstart","keydown"].forEach(ev=>window.addEventListener(ev,unlockAudio,{passive:true}));
 
-  function crunch(big){
+  // 표면 톡톡(탭핑) — 안 깨질 만큼 가벼운 접촉음
+  function tapSound(){
     const ac=audio(); if (ac.state==="suspended") ac.resume();
     const now=ac.currentTime;
-    if (now-lastSound<0.02) return;
+    const dur=0.012;
+    const buf=ac.createBuffer(1,Math.floor(ac.sampleRate*dur),ac.sampleRate);
+    const d=buf.getChannelData(0);
+    for (let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,5);
+    const src=ac.createBufferSource(); src.buffer=buf;
+    const bp=ac.createBiquadFilter(); bp.type="bandpass";
+    bp.frequency.value=(frozen?5200:3800); bp.Q.value=1.4;
+    const g=ac.createGain(); g.gain.value=0.07;
+    src.connect(bp).connect(g).connect(ac.destination); src.start(now); src.stop(now+dur);
+    // 살짝의 울림
+    const o=ac.createOscillator(); o.type="triangle";
+    o.frequency.setValueAtTime(frozen?2400:1700,now);
+    o.frequency.exponentialRampToValueAtTime(900,now+0.02);
+    const og=ac.createGain(); og.gain.setValueAtTime(0.05,now);
+    og.gain.exponentialRampToValueAtTime(0.0001,now+0.03);
+    o.connect(og).connect(ac.destination); o.start(now); o.stop(now+0.04);
+  }
+  // 다 깬 슬라임 누름 — 물컹 탭
+  function squishTap(){
+    const ac=audio(); if (ac.state==="suspended") ac.resume();
+    const now=ac.currentTime;
+    const o=ac.createOscillator(); o.type="sine";
+    o.frequency.setValueAtTime(220,now); o.frequency.exponentialRampToValueAtTime(90,now+0.1);
+    const g=ac.createGain(); g.gain.setValueAtTime(0.0001,now);
+    g.gain.exponentialRampToValueAtTime(0.18,now+0.01); g.gain.exponentialRampToValueAtTime(0.0001,now+0.13);
+    o.connect(g).connect(ac.destination); o.start(now); o.stop(now+0.15);
+  }
+  // 왁스 깨짐 — 빠작/사각 (얼리면 더 단단/고음)
+  function crunch(big, layer){
+    const ac=audio(); if (ac.state==="suspended") ac.resume();
+    const now=ac.currentTime;
+    if (now-lastSound<0.018) return;
     lastSound=now;
-
-    // 묵직한 저음 '뿌' (첫 깸/큰 깸일수록 강하게)
     if (big){
       const o=ac.createOscillator(); o.type="sine";
-      o.frequency.setValueAtTime(150,now);
-      o.frequency.exponentialRampToValueAtTime(60,now+0.12);
-      const g=ac.createGain();
-      g.gain.setValueAtTime(0.0001,now);
-      g.gain.exponentialRampToValueAtTime(0.4,now+0.01);
+      o.frequency.setValueAtTime(frozen?180:150,now);
+      o.frequency.exponentialRampToValueAtTime(frozen?70:60,now+0.12);
+      const g=ac.createGain(); g.gain.setValueAtTime(0.0001,now);
+      g.gain.exponentialRampToValueAtTime(frozen?0.34:0.4,now+0.01);
       g.gain.exponentialRampToValueAtTime(0.0001,now+0.16);
       o.connect(g).connect(ac.destination); o.start(now); o.stop(now+0.18);
     }
-
-    // 잘게 부서지는 '빠작/사각' 크런치
     const bursts=(big?4:2)+(Math.random()*3|0);
     for (let k=0;k<bursts;k++){
       const t=now+k*(0.004+Math.random()*0.012);
-      const dur=0.018+Math.random()*0.022;
+      const dur=(frozen?0.012:0.018)+Math.random()*0.02;
       const buf=ac.createBuffer(1,Math.floor(ac.sampleRate*dur),ac.sampleRate);
       const d=buf.getChannelData(0);
-      for (let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,6);
+      for (let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,frozen?8:6);
       const src=ac.createBufferSource(); src.buffer=buf;
       const bp=ac.createBiquadFilter(); bp.type="bandpass";
-      bp.frequency.value=1600+Math.random()*3800; bp.Q.value=0.7+Math.random();
+      bp.frequency.value=(frozen?3000:1600)+Math.random()*(frozen?4500:3800); bp.Q.value=0.7+Math.random();
       const g=ac.createGain(); g.gain.value=(big?0.2:0.13)+Math.random()*0.12;
-      src.connect(bp).connect(g).connect(ac.destination);
-      src.start(t); src.stop(t+dur);
+      src.connect(bp).connect(g).connect(ac.destination); src.start(t); src.stop(t+dur);
     }
   }
 
-  // ── 진행도(다 부쉈는지) ──
+  // ── 진행도 ──
   let done=false, firstCrack=true, checkTick=0;
   function maybeCheckDone(){
     if (done) return;
@@ -313,7 +405,8 @@
     const N=60;
     const tmp=maybeCheckDone._c||(maybeCheckDone._c=document.createElement("canvas"));
     tmp.width=N; tmp.height=N;
-    const tctx=tmp.getContext("2d"); tctx.clearRect(0,0,N,N); tctx.drawImage(waxC,0,0,N,N);
+    const tctx=tmp.getContext("2d",{willReadFrequently:true});
+    tctx.clearRect(0,0,N,N); tctx.drawImage(waxC[0],0,0,N,N);   // 바닥층 기준
     const data=tctx.getImageData(0,0,N,N).data;
     let total=0,remain=0; const cx=N/2,cy=N/2,rr=(N/2)*0.92;
     for (let y=0;y<N;y++) for (let x=0;x<N;x++){
@@ -335,7 +428,7 @@
     });
   }
 
-  // ── 입력(누르기 위주 + 누른 채 문지르기) ──
+  // ── 입력 ──
   let holding=false, lastX=null, lastY=null;
   function pos(e){
     const r=stage.getBoundingClientRect();
@@ -346,12 +439,12 @@
     holding=true; stage.classList.add("squish");
     stage.setPointerCapture && stage.setPointerCapture(e.pointerId);
     const [x,y]=pos(e); lastX=x; lastY=y;
+    tapSound();                                  // 접촉 톡
     if (inBall(x,y)){ crackAt(x,y, firstCrack); firstCrack=false; }
   });
   stage.addEventListener("pointermove",(e)=>{
     if (!holding) return; e.preventDefault();
     const [x,y]=pos(e);
-    // 일정 거리 이상 움직였을 때만 이어서 깸(누르는 손맛 유지)
     if (lastX!==null){
       const d=Math.hypot(x-lastX,y-lastY);
       if (d > R*0.14 && inBall(x,y)){ crackAt(x,y,false); lastX=x; lastY=y; }
@@ -362,7 +455,12 @@
   stage.addEventListener("pointercancel",end);
 
   document.getElementById("reset").addEventListener("click",()=>{
-    chips.length=0; fc.clearRect(0,0,W,H); coatWax();
+    parts.length=0; fc.clearRect(0,0,W,H); coatWax();
+  });
+  const freezeBtn=document.getElementById("freeze");
+  freezeBtn.addEventListener("click",()=>{
+    frozen=!frozen; freezeBtn.setAttribute("aria-pressed", String(frozen));
+    freezeBtn.textContent = frozen ? "❄️ 얼림" : "❄️ 얼리기";
   });
 
   setup();

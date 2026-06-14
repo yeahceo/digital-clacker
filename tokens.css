@@ -1,0 +1,144 @@
+/* =====================================================================
+   디자인 토큰 (Design Tokens) — 디지털 클락커 / 왁뿌볼
+   ---------------------------------------------------------------------
+   구조: Primitive(원시값) → Semantic(의미값) → Theme(테마별 override)
+   런타임 소스. 기계가독 소스는 tokens.json 참고.
+   사용법: <link rel="stylesheet" href="tokens.css">
+           <html data-theme="cute"> 또는 data-theme="dark"
+   ===================================================================== */
+
+:root {
+  /* ── Primitive · 색상 ───────────────────────────────── */
+  /* 핑크(큐트) */
+  --pink-50:  #fdf0f4;
+  --pink-100: #ffd9e6;
+  --pink-200: #ffb3c8;
+  --pink-300: #f7c5d5;
+  --pink-400: #e6a6bd;
+  --pink-700: #b8086e;
+
+  /* 퍼플(왁뿌 UI) */
+  --purple-100: #cabfd4;
+  --purple-300: #b79fd0;
+  --purple-400: #c9a7e6;
+  --purple-500: #a981d6;
+  --purple-700: #5b3b6e;
+
+  /* 잉크 / 중성 */
+  --ink-900: #1b1b1f;
+  --ink-700: #443a4a;
+  --white:   #ffffff;
+
+  /* 다크 배경 */
+  --night-900: #110e16;
+  --night-700: #1a1620;
+  --night-500: #2a2230;
+
+  /* 왁스(크림) 톤 */
+  --wax-cream-50: #fbfbf7;
+  --wax-cream-100: #f3efe6;
+  --wax-cream-200: #eceae4;
+  --wax-cream-300: #e6e3da;
+  --wax-cream-400: #d7d4cd;
+  --wax-cream-shadow: #b4afa4;
+  --wax-crack-ink: #6e6a62;
+
+  /* ── Primitive · 간격(8pt 스케일) ──────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 22px;
+  --space-6: 28px;
+  --space-8: 40px;
+
+  /* ── Primitive · 반경 ──────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+
+  /* ── Primitive · 타이포 ────────────────────────────── */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+  --tracking-wide: 0.5px;
+  --tracking-title: 3px;
+
+  /* ── Primitive · 모션 ──────────────────────────────── */
+  --dur-fast: 0.06s;
+  --dur-base: 0.15s;
+  --dur-slow: 0.25s;
+  --ease-out: ease;
+
+  /* ── Primitive · 그림자 ────────────────────────────── */
+  --shadow-float: 0 18px 40px -12px rgba(60, 70, 90, 0.35);
+  --shadow-drop: 0 24px 36px rgba(0, 0, 0, 0.55);
+  --shadow-btn: 0 8px 18px -6px rgba(160, 120, 210, 0.7);
+}
+
+/* =====================================================================
+   Semantic + Theme
+   ===================================================================== */
+
+/* 기본(큐트) = 키캡키링. data-theme 없을 때도 적용. */
+:root,
+[data-theme="cute"] {
+  --bg: var(--pink-50);
+  --bg-dot: var(--pink-300);
+  --bg-dot-size: 40px;
+
+  --surface: rgba(255, 255, 255, 0.55);
+  --surface-2: rgba(255, 255, 255, 0.2);
+  --surface-edge: rgba(255, 255, 255, 0.75);
+
+  --text: var(--pink-700);
+  --text-muted: var(--pink-400);
+  --title: var(--pink-400);
+
+  --accent: var(--pink-200);
+  --accent-2: var(--pink-100);
+  --on-accent: var(--white);
+
+  --keycap-face-a: var(--white);
+  --keycap-face-b: #fdf4f7;
+  --keycap-face-c: #f6e7ec;
+  --keycap-side: #e3c9d3;
+
+  --shadow-elevated: var(--shadow-float);
+}
+
+/* 다크 = 왁뿌볼 */
+[data-theme="dark"] {
+  --bg: var(--night-700);
+  --bg-grad: radial-gradient(120% 120% at 50% 0%,
+              var(--night-500) 0%, var(--night-700) 60%, var(--night-900) 100%);
+
+  --surface: rgba(255, 255, 255, 0.92);
+  --text: var(--purple-100);
+  --text-muted: rgba(202, 191, 212, 0.65);
+  --title: var(--purple-300);
+
+  --accent: var(--purple-400);
+  --accent-2: var(--purple-500);
+  --on-accent: var(--white);
+  --toast-text: var(--purple-700);
+
+  --shadow-elevated: var(--shadow-drop);
+
+  /* 왁뿌 전용(캔버스에서 JS가 읽어 사용) */
+  --wax-top: var(--wax-cream-50);
+  --wax-mid: var(--wax-cream-200);
+  --wax-bottom: var(--wax-cream-300);
+  --wax-edge: var(--wax-cream-400);
+  --wax-rim: var(--wax-cream-100);
+  --wax-rim-shadow: var(--wax-cream-shadow);
+  --wax-chip: var(--wax-cream-100);
+  --wax-crack: var(--wax-crack-ink);
+}

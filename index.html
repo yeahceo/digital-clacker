@@ -6,8 +6,6 @@
 <title>디지털 클락커 · 키캡키링</title>
 <style>
   :root {
-    --bg: #f4f5f7;
-    --body: rgba(255, 255, 255, 0.18);
     --body-edge: rgba(255, 255, 255, 0.75);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -18,11 +16,16 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 28px;
-    background: radial-gradient(120% 120% at 50% 10%, #fbfbfd 0%, #eceef2 60%, #e2e5ea 100%);
+    /* ── 땡땡이(폴카닷) 배경 ── */
+    background-color: #fdf0f4;
+    background-image:
+      radial-gradient(circle, #f7c5d5 6px, transparent 7px),
+      radial-gradient(circle, #f7c5d5 6px, transparent 7px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
       "Malgun Gothic", sans-serif;
-    color: #8a8f99;
+    color: #b08;
     user-select: none;
     overflow: hidden;
   }
@@ -52,13 +55,13 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.12));
+    background: linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.2));
     border: 1.5px solid var(--body-edge);
     border-radius: 22px;
     box-shadow:
-      0 18px 40px -12px rgba(60, 70, 90, 0.35),
+      0 18px 40px -12px rgba(120, 70, 90, 0.35),
       inset 0 1px 2px rgba(255,255,255,0.9),
-      inset 0 -10px 22px rgba(180,190,205,0.25);
+      inset 0 -10px 22px rgba(220,190,205,0.3);
     backdrop-filter: blur(2px);
   }
 
@@ -67,13 +70,13 @@
     position: relative;
     aspect-ratio: 1 / 1;
     border-radius: 16px;
-    background: linear-gradient(160deg, #ffffff 0%, #f3f4f7 70%, #e8eaee 100%);
+    background: linear-gradient(160deg, #ffffff 0%, #fdf4f7 70%, #f6e7ec 100%);
     border: 1px solid rgba(255,255,255,0.9);
     box-shadow:
-      0 6px 0 #c9cdd6,            /* 키캡 옆벽(높이) */
-      0 9px 14px rgba(70,80,100,0.28),
+      0 6px 0 #e3c9d3,            /* 키캡 옆벽(높이) */
+      0 9px 14px rgba(120,80,100,0.25),
       inset 0 2px 3px rgba(255,255,255,0.95),
-      inset 0 -3px 6px rgba(190,196,208,0.5);
+      inset 0 -3px 6px rgba(225,200,212,0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -83,8 +86,8 @@
     will-change: transform;
   }
   .keycap .glyph {
-    width: 58%;
-    height: 58%;
+    width: 64%;
+    height: 64%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -92,41 +95,19 @@
   }
   .keycap .glyph svg { width: 100%; height: 100%; }
 
-  /* 날개 키캡: 미세한 도트 배경 */
-  .keycap.wing {
-    background-image:
-      radial-gradient(rgba(170,178,192,0.55) 1px, transparent 1.2px),
-      linear-gradient(160deg, #ffffff 0%, #f3f4f7 70%, #e8eaee 100%);
-    background-size: 7px 7px, 100% 100%;
-  }
-
   /* 눌림 상태 */
   .keycap.pressed {
     transform: translateY(5px);
     box-shadow:
-      0 1px 0 #c9cdd6,
-      0 2px 5px rgba(70,80,100,0.25),
-      inset 0 2px 4px rgba(180,186,200,0.55);
+      0 1px 0 #e3c9d3,
+      0 2px 5px rgba(120,80,100,0.25),
+      inset 0 2px 4px rgba(220,196,208,0.55);
   }
 
-  /* ── 카운터 / 안내 ── */
-  .meta {
-    text-align: center;
-    font-size: 13px;
-    letter-spacing: .2px;
-    line-height: 1.7;
-  }
-  .meta .count {
-    font-size: 22px;
-    font-weight: 700;
-    color: #4a5160;
-    font-variant-numeric: tabular-nums;
-  }
-  .hint { font-size: 12px; opacity: .7; }
   .title {
     position: fixed; top: 26px; left: 0; right: 0;
     text-align: center; font-size: 13px; letter-spacing: 3px;
-    color: #aeb4c0; font-weight: 600;
+    color: #e6a6bd; font-weight: 700;
   }
 </style>
 </head>
@@ -137,50 +118,84 @@
     <!-- 볼체인 + 고리 -->
     <div class="chain">
       <svg width="90" height="60" viewBox="0 0 90 60">
-        <g stroke="#b9bec8" stroke-width="3" fill="none">
+        <g stroke="#d6a9bb" stroke-width="3" fill="none">
           <path d="M45 60 C45 44 30 40 26 30 C22 20 30 12 40 12" />
         </g>
         <!-- 볼체인 구슬 -->
-        <g fill="#c4c9d2">
+        <g fill="#e0b6c6">
           <circle cx="45" cy="56" r="3.2"/><circle cx="42" cy="49" r="3.2"/>
           <circle cx="37" cy="43" r="3.2"/><circle cx="30" cy="38" r="3.2"/>
           <circle cx="25" cy="31" r="3.2"/><circle cx="23" cy="23" r="3.2"/>
           <circle cx="28" cy="16" r="3.2"/><circle cx="36" cy="12.5" r="3.2"/>
         </g>
         <!-- 카라비너 고리 -->
-        <g stroke="#aeb4bf" stroke-width="5" fill="none" stroke-linecap="round">
+        <g stroke="#d2a4b6" stroke-width="5" fill="none" stroke-linecap="round">
           <circle cx="58" cy="20" r="15"/>
         </g>
-        <line x1="58" y1="9" x2="58" y2="31" stroke="#cfd3db" stroke-width="3"/>
+        <line x1="58" y1="9" x2="58" y2="31" stroke="#e8c4d2" stroke-width="3"/>
       </svg>
     </div>
 
     <!-- 투명 바디 -->
     <div class="body">
-      <div class="keycap star" data-key="f" data-sound="hi" tabindex="0" aria-label="별 버튼">
-        <span class="glyph">
-          <svg viewBox="0 0 100 100"><path fill="#1b1b1f"
-            d="M50 6 61 38 95 38 67 58 78 92 50 71 22 92 33 58 5 38 39 38Z"/></svg>
-        </span>
-      </div>
-      <div class="keycap wing" data-key="j" data-sound="lo" tabindex="0" aria-label="날개 버튼">
+      <!-- 고양이 1: 동그란 눈 -->
+      <div class="keycap" data-key="f" data-sound="hi" tabindex="0" aria-label="고양이 버튼 1">
         <span class="glyph">
           <svg viewBox="0 0 100 100">
-            <path fill="none" stroke="#1b1b1f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"
-              d="M88 34 C70 26 44 28 28 44 C20 52 16 64 16 64
-                 C16 64 26 60 33 62 C28 68 26 76 26 76
-                 C26 76 38 68 45 70 C41 76 41 82 41 82
-                 C52 74 64 60 72 50"/>
-            <path fill="#1b1b1f" d="M86 32 a4 4 0 1 0 0.1 0Z"/>
+            <!-- 귀 -->
+            <path fill="#1b1b1f" d="M27 34 L22 13 L44 27 Z"/>
+            <path fill="#1b1b1f" d="M73 34 L78 13 L56 27 Z"/>
+            <path fill="#ffb3c8" d="M30 32 L27 20 L40 28 Z"/>
+            <path fill="#ffb3c8" d="M70 32 L73 20 L60 28 Z"/>
+            <!-- 얼굴 -->
+            <circle cx="50" cy="56" r="30" fill="#fff" stroke="#1b1b1f" stroke-width="4"/>
+            <!-- 볼터치 -->
+            <circle cx="35" cy="63" r="5" fill="#ffb3c8"/>
+            <circle cx="65" cy="63" r="5" fill="#ffb3c8"/>
+            <!-- 눈 -->
+            <circle cx="40" cy="52" r="4" fill="#1b1b1f"/>
+            <circle cx="60" cy="52" r="4" fill="#1b1b1f"/>
+            <!-- 코/입 -->
+            <path d="M50 58 L50 61 M50 61 Q45 65 42 62 M50 61 Q55 65 58 62"
+              fill="none" stroke="#1b1b1f" stroke-width="2.6" stroke-linecap="round"/>
+            <!-- 수염 -->
+            <g stroke="#1b1b1f" stroke-width="2.4" stroke-linecap="round">
+              <line x1="18" y1="55" x2="31" y2="56"/><line x1="18" y1="62" x2="31" y2="61"/>
+              <line x1="82" y1="55" x2="69" y2="56"/><line x1="82" y1="62" x2="69" y2="61"/>
+            </g>
+          </svg>
+        </span>
+      </div>
+
+      <!-- 고양이 2: 웃는 눈 ^^ -->
+      <div class="keycap" data-key="j" data-sound="lo" tabindex="0" aria-label="고양이 버튼 2">
+        <span class="glyph">
+          <svg viewBox="0 0 100 100">
+            <!-- 귀 -->
+            <path fill="#1b1b1f" d="M27 34 L22 13 L44 27 Z"/>
+            <path fill="#1b1b1f" d="M73 34 L78 13 L56 27 Z"/>
+            <path fill="#ffb3c8" d="M30 32 L27 20 L40 28 Z"/>
+            <path fill="#ffb3c8" d="M70 32 L73 20 L60 28 Z"/>
+            <!-- 얼굴 -->
+            <circle cx="50" cy="56" r="30" fill="#fff" stroke="#1b1b1f" stroke-width="4"/>
+            <!-- 볼터치 -->
+            <circle cx="35" cy="63" r="5" fill="#ffb3c8"/>
+            <circle cx="65" cy="63" r="5" fill="#ffb3c8"/>
+            <!-- 웃는 눈 -->
+            <path d="M35 53 Q40 47 45 53" fill="none" stroke="#1b1b1f" stroke-width="3" stroke-linecap="round"/>
+            <path d="M55 53 Q60 47 65 53" fill="none" stroke="#1b1b1f" stroke-width="3" stroke-linecap="round"/>
+            <!-- 코/입 -->
+            <path d="M50 58 L50 61 M50 61 Q45 65 42 62 M50 61 Q55 65 58 62"
+              fill="none" stroke="#1b1b1f" stroke-width="2.6" stroke-linecap="round"/>
+            <!-- 수염 -->
+            <g stroke="#1b1b1f" stroke-width="2.4" stroke-linecap="round">
+              <line x1="18" y1="55" x2="31" y2="56"/><line x1="18" y1="62" x2="31" y2="61"/>
+              <line x1="82" y1="55" x2="69" y2="56"/><line x1="82" y1="62" x2="69" y2="61"/>
+            </g>
           </svg>
         </span>
       </div>
     </div>
-  </div>
-
-  <div class="meta">
-    <div class="count" id="count">0</div>
-    <div class="hint">버튼을 누르거나 키보드 <b>F</b> · <b>J</b> 를 눌러보세요</div>
   </div>
 
 <script>
@@ -189,19 +204,51 @@
   let ctx;
   function audio() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === "suspended") ctx.resume();
     return ctx;
   }
+
+  // 모바일(특히 iOS) 오디오 언락:
+  //  1) 첫 사용자 입력에서 AudioContext resume + 무음 버퍼 재생
+  //  2) 무음 루프 <audio>로 오디오 세션을 'playback'으로 전환 → 무음 스위치에도 소리 재생
+  let unlocked = false;
+  let silentEl;
+  function unlockAudio() {
+    if (unlocked) return;
+    const ac = audio();
+    if (ac.state === "suspended") ac.resume();
+    // 무음 버퍼 1샘플 재생
+    const b = ac.createBuffer(1, 1, 22050);
+    const s = ac.createBufferSource();
+    s.buffer = b; s.connect(ac.destination); s.start(0);
+    // 무음 루프 오디오 (iOS 무음 스위치 우회)
+    if (!silentEl) {
+      silentEl = new Audio(
+        "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="
+      );
+      silentEl.loop = true;
+      silentEl.volume = 0.001;
+    }
+    silentEl.play().catch(function(){});
+    unlocked = true;
+  }
+  // 화면 어디를 처음 만지든 언락
+  ["pointerdown", "touchstart", "keydown"].forEach(function (ev) {
+    window.addEventListener(ev, unlockAudio, { once: false, passive: true });
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && ctx && ctx.state === "suspended") ctx.resume();
+  });
 
   // 두 단계(누름/뗌) 클릭. variant: 음높이/질감 살짝 다르게
   function click(variant, down) {
     const ac = audio();
+    if (ac.state === "suspended") ac.resume();
     const t = ac.currentTime;
     const base = variant === "hi" ? 1.0 : 0.82;
 
     // 1) 짧은 노이즈 버스트 = 플라스틱 부딪히는 '딱'
     const dur = 0.045;
-    const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+    const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * dur), ac.sampleRate);
     const data = buf.getChannelData(0);
     for (let i = 0; i < data.length; i++) {
       const env = Math.pow(1 - i / data.length, down ? 7 : 12);
@@ -232,10 +279,6 @@
     osc.stop(t + 0.06);
   }
 
-  // ── 카운터 ──
-  let count = 0;
-  const countEl = document.getElementById("count");
-
   // ── 키캡 누름/뗌 처리 ──
   const caps = {};
   document.querySelectorAll(".keycap").forEach((cap) => {
@@ -246,8 +289,6 @@
     if (!cap || cap.classList.contains("pressed")) return;
     cap.classList.add("pressed");
     click(cap.dataset.sound, true);
-    count++;
-    countEl.textContent = count;
   }
   function release(cap) {
     if (!cap || !cap.classList.contains("pressed")) return;
@@ -257,7 +298,7 @@
 
   // 포인터(마우스/터치)
   document.querySelectorAll(".keycap").forEach((cap) => {
-    cap.addEventListener("pointerdown", (e) => { e.preventDefault(); press(cap); });
+    cap.addEventListener("pointerdown", (e) => { e.preventDefault(); unlockAudio(); press(cap); });
     cap.addEventListener("pointerup", () => release(cap));
     cap.addEventListener("pointerleave", () => release(cap));
     cap.addEventListener("pointercancel", () => release(cap));

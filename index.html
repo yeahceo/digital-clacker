@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>디지털 클락커 · 키캡키링</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --body: rgba(255, 255, 255, 0.18);
+    --body-edge: rgba(255, 255, 255, 0.75);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+  body {
+    position: fixed; inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    background: radial-gradient(120% 120% at 50% 10%, #fbfbfd 0%, #eceef2 60%, #e2e5ea 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+      "Malgun Gothic", sans-serif;
+    color: #8a8f99;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  /* ── 키링 전체 ── */
+  .keyring {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 볼체인 + 고리 */
+  .chain {
+    width: 90px;
+    height: 60px;
+    margin-bottom: -6px;
+    display: flex;
+    justify-content: center;
+  }
+  .chain svg { overflow: visible; }
+
+  /* 투명 바디 */
+  .body {
+    width: 150px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.12));
+    border: 1.5px solid var(--body-edge);
+    border-radius: 22px;
+    box-shadow:
+      0 18px 40px -12px rgba(60, 70, 90, 0.35),
+      inset 0 1px 2px rgba(255,255,255,0.9),
+      inset 0 -10px 22px rgba(180,190,205,0.25);
+    backdrop-filter: blur(2px);
+  }
+
+  /* ── 키캡 ── */
+  .keycap {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+    background: linear-gradient(160deg, #ffffff 0%, #f3f4f7 70%, #e8eaee 100%);
+    border: 1px solid rgba(255,255,255,0.9);
+    box-shadow:
+      0 6px 0 #c9cdd6,            /* 키캡 옆벽(높이) */
+      0 9px 14px rgba(70,80,100,0.28),
+      inset 0 2px 3px rgba(255,255,255,0.95),
+      inset 0 -3px 6px rgba(190,196,208,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform .04s ease, box-shadow .04s ease;
+    will-change: transform;
+  }
+  .keycap .glyph {
+    width: 58%;
+    height: 58%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .keycap .glyph svg { width: 100%; height: 100%; }
+
+  /* 날개 키캡: 미세한 도트 배경 */
+  .keycap.wing {
+    background-image:
+      radial-gradient(rgba(170,178,192,0.55) 1px, transparent 1.2px),
+      linear-gradient(160deg, #ffffff 0%, #f3f4f7 70%, #e8eaee 100%);
+    background-size: 7px 7px, 100% 100%;
+  }
+
+  /* 눌림 상태 */
+  .keycap.pressed {
+    transform: translateY(5px);
+    box-shadow:
+      0 1px 0 #c9cdd6,
+      0 2px 5px rgba(70,80,100,0.25),
+      inset 0 2px 4px rgba(180,186,200,0.55);
+  }
+
+  /* ── 카운터 / 안내 ── */
+  .meta {
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: .2px;
+    line-height: 1.7;
+  }
+  .meta .count {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4a5160;
+    font-variant-numeric: tabular-nums;
+  }
+  .hint { font-size: 12px; opacity: .7; }
+  .title {
+    position: fixed; top: 26px; left: 0; right: 0;
+    text-align: center; font-size: 13px; letter-spacing: 3px;
+    color: #aeb4c0; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <div class="title">DIGITAL CLACKER</div>
+
+  <div class="keyring">
+    <!-- 볼체인 + 고리 -->
+    <div class="chain">
+      <svg width="90" height="60" viewBox="0 0 90 60">
+        <g stroke="#b9bec8" stroke-width="3" fill="none">
+          <path d="M45 60 C45 44 30 40 26 30 C22 20 30 12 40 12" />
+        </g>
+        <!-- 볼체인 구슬 -->
+        <g fill="#c4c9d2">
+          <circle cx="45" cy="56" r="3.2"/><circle cx="42" cy="49" r="3.2"/>
+          <circle cx="37" cy="43" r="3.2"/><circle cx="30" cy="38" r="3.2"/>
+          <circle cx="25" cy="31" r="3.2"/><circle cx="23" cy="23" r="3.2"/>
+          <circle cx="28" cy="16" r="3.2"/><circle cx="36" cy="12.5" r="3.2"/>
+        </g>
+        <!-- 카라비너 고리 -->
+        <g stroke="#aeb4bf" stroke-width="5" fill="none" stroke-linecap="round">
+          <circle cx="58" cy="20" r="15"/>
+        </g>
+        <line x1="58" y1="9" x2="58" y2="31" stroke="#cfd3db" stroke-width="3"/>
+      </svg>
+    </div>
+
+    <!-- 투명 바디 -->
+    <div class="body">
+      <div class="keycap star" data-key="f" data-sound="hi" tabindex="0" aria-label="별 버튼">
+        <span class="glyph">
+          <svg viewBox="0 0 100 100"><path fill="#1b1b1f"
+            d="M50 6 61 38 95 38 67 58 78 92 50 71 22 92 33 58 5 38 39 38Z"/></svg>
+        </span>
+      </div>
+      <div class="keycap wing" data-key="j" data-sound="lo" tabindex="0" aria-label="날개 버튼">
+        <span class="glyph">
+          <svg viewBox="0 0 100 100">
+            <path fill="none" stroke="#1b1b1f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"
+              d="M88 34 C70 26 44 28 28 44 C20 52 16 64 16 64
+                 C16 64 26 60 33 62 C28 68 26 76 26 76
+                 C26 76 38 68 45 70 C41 76 41 82 41 82
+                 C52 74 64 60 72 50"/>
+            <path fill="#1b1b1f" d="M86 32 a4 4 0 1 0 0.1 0Z"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div class="count" id="count">0</div>
+    <div class="hint">버튼을 누르거나 키보드 <b>F</b> · <b>J</b> 를 눌러보세요</div>
+  </div>
+
+<script>
+(function () {
+  // ── 오디오: Web Audio API로 기계식 '딸깍' 합성 ──
+  let ctx;
+  function audio() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+
+  // 두 단계(누름/뗌) 클릭. variant: 음높이/질감 살짝 다르게
+  function click(variant, down) {
+    const ac = audio();
+    const t = ac.currentTime;
+    const base = variant === "hi" ? 1.0 : 0.82;
+
+    // 1) 짧은 노이즈 버스트 = 플라스틱 부딪히는 '딱'
+    const dur = 0.045;
+    const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const env = Math.pow(1 - i / data.length, down ? 7 : 12);
+      data[i] = (Math.random() * 2 - 1) * env;
+    }
+    const noise = ac.createBufferSource();
+    noise.buffer = buf;
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = (down ? 2600 : 3400) * base;
+    bp.Q.value = 0.8;
+    const ng = ac.createGain();
+    ng.gain.value = down ? 0.5 : 0.32;
+    noise.connect(bp).connect(ng).connect(ac.destination);
+    noise.start(t);
+    noise.stop(t + dur);
+
+    // 2) 짧은 톤 = '딸깍'의 울림
+    const osc = ac.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime((down ? 720 : 1050) * base, t);
+    osc.frequency.exponentialRampToValueAtTime((down ? 380 : 620) * base, t + 0.03);
+    const og = ac.createGain();
+    og.gain.setValueAtTime(down ? 0.22 : 0.14, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    osc.connect(og).connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + 0.06);
+  }
+
+  // ── 카운터 ──
+  let count = 0;
+  const countEl = document.getElementById("count");
+
+  // ── 키캡 누름/뗌 처리 ──
+  const caps = {};
+  document.querySelectorAll(".keycap").forEach((cap) => {
+    caps[cap.dataset.key] = cap;
+  });
+
+  function press(cap) {
+    if (!cap || cap.classList.contains("pressed")) return;
+    cap.classList.add("pressed");
+    click(cap.dataset.sound, true);
+    count++;
+    countEl.textContent = count;
+  }
+  function release(cap) {
+    if (!cap || !cap.classList.contains("pressed")) return;
+    cap.classList.remove("pressed");
+    click(cap.dataset.sound, false);
+  }
+
+  // 포인터(마우스/터치)
+  document.querySelectorAll(".keycap").forEach((cap) => {
+    cap.addEventListener("pointerdown", (e) => { e.preventDefault(); press(cap); });
+    cap.addEventListener("pointerup", () => release(cap));
+    cap.addEventListener("pointerleave", () => release(cap));
+    cap.addEventListener("pointercancel", () => release(cap));
+  });
+
+  // 키보드 F / J
+  window.addEventListener("keydown", (e) => {
+    if (e.repeat) return;
+    const cap = caps[e.key.toLowerCase()];
+    if (cap) { e.preventDefault(); press(cap); }
+  });
+  window.addEventListener("keyup", (e) => {
+    const cap = caps[e.key.toLowerCase()];
+    if (cap) release(cap);
+  });
+})();
+</script>
+</body>
+</html>
